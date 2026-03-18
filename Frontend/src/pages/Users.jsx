@@ -16,12 +16,24 @@ function Users() {
   });
   const [blockError, setBlockError] = useState("");
 
+  const token = localStorage.getItem("token");
+
+  const authHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/users");
+      const response = await fetch("http://localhost:5000/api/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -104,9 +116,7 @@ function Users() {
         `http://localhost:5000/api/users/${selectedUser._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             name: selectedUser.name,
             email: selectedUser.email,
@@ -144,9 +154,7 @@ function Users() {
         `http://localhost:5000/api/users/${selectedUser._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             name: selectedUser.name,
             email: selectedUser.email,
@@ -184,6 +192,9 @@ function Users() {
         `http://localhost:5000/api/users/${selectedUser._id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 

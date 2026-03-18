@@ -9,12 +9,19 @@ function Mentors() {
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
+  const token = localStorage.getItem("token");
+
   const fetchMentors = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/mentors");
+      const response = await fetch("http://localhost:5000/api/mentors", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
 
       if (!response.ok) {

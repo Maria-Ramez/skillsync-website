@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
 
 const {
   getCareerPaths,
@@ -8,9 +9,9 @@ const {
   deleteCareerPath,
 } = require("../controllers/careerPathController");
 
-router.get("/", getCareerPaths);
-router.post("/", createCareerPath);
-router.put("/:id", updateCareerPath);
-router.delete("/:id", deleteCareerPath);
+router.get("/", protect, getCareerPaths);
+router.post("/", protect, createCareerPath);
+router.put("/:id", protect, updateCareerPath);
+router.delete("/:id", protect, deleteCareerPath);
 
 module.exports = router;

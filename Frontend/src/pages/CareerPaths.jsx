@@ -15,12 +15,24 @@ function CareerPaths() {
     resources: "",
   });
 
+  const token = localStorage.getItem("token");
+
+  const authHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+
   const fetchCareerPaths = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/careerpaths");
+      const response = await fetch("http://localhost:5000/api/careerpaths", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -91,9 +103,7 @@ function CareerPaths() {
     try {
       const response = await fetch("http://localhost:5000/api/careerpaths", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders,
         body: JSON.stringify(formData),
       });
 
@@ -123,9 +133,7 @@ function CareerPaths() {
         `http://localhost:5000/api/careerpaths/${selectedCareer._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders,
           body: JSON.stringify(formData),
         }
       );
@@ -154,6 +162,9 @@ function CareerPaths() {
         `http://localhost:5000/api/careerpaths/${selectedCareer._id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 

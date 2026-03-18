@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginAdmin } from "../services/authService";
 
 function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,11 +21,23 @@ function Login() {
     setError("");
 
     try {
-      const data = await loginAdmin(email, password);
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      localStorage.setItem("adminLoggedIn", "true");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("admin", JSON.stringify(data.admin));
+      localStorage.setItem("adminLoggedIn", "true");
 
       navigate("/dashboard");
     } catch (err) {

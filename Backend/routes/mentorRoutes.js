@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
 
 const {
   getMentors,
@@ -8,9 +9,9 @@ const {
   deleteMentor,
 } = require("../controllers/mentorController");
 
-router.get("/", getMentors);
-router.post("/", createMentor);
-router.put("/:id", updateMentor);
-router.delete("/:id", deleteMentor);
+router.get("/", protect, getMentors);
+router.post("/", protect, createMentor);
+router.put("/:id", protect, updateMentor);
+router.delete("/:id", protect, deleteMentor);
 
 module.exports = router;
