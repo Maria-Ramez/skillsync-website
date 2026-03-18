@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/AdminLayout";
 import DashboardCard from "../components/DashboardCard";
 
@@ -20,6 +21,40 @@ function SectionCard({ children, style = {} }) {
 }
 
 function Dashboard() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalMentors: 0,
+    totalCareerPaths: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/dashboard/stats");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to load dashboard stats");
+        }
+
+        setStats({
+          totalUsers: data.totalUsers || 0,
+          totalMentors: data.totalMentors || 0,
+          totalCareerPaths: data.totalCareerPaths || 0,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard stats:", error.message);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
+
+  const displayValue = (value) => (loadingStats ? "..." : value);
+
   return (
     <AdminLayout>
       <div style={{ marginBottom: "22px" }}>
@@ -54,20 +89,20 @@ function Dashboard() {
       >
         <DashboardCard
           title="Total Users"
-          value="1,245"
-          subtitle="+12% this month"
+          value={displayValue(stats.totalUsers)}
+          subtitle="Registered accounts"
           accent="#F5A100"
         />
         <DashboardCard
           title="Total Mentors"
-          value="85"
-          subtitle="+8 new mentors"
+          value={displayValue(stats.totalMentors)}
+          subtitle="Available mentors"
           accent="#7DB3D1"
         />
         <DashboardCard
-          title="Pending Mentors"
-          value="12"
-          subtitle="Awaiting review"
+          title="Career Paths"
+          value={displayValue(stats.totalCareerPaths)}
+          subtitle="Published paths"
           accent="#B0D6EA"
         />
         <DashboardCard
@@ -343,7 +378,7 @@ function Dashboard() {
                     fontWeight: "800",
                   }}
                 >
-                  85
+                  {displayValue(stats.totalMentors)}
                 </div>
               </div>
 
@@ -395,9 +430,9 @@ function Dashboard() {
 
             <div style={{ display: "grid", gap: "12px" }}>
               {[
-                ["Revenue", "$12,450"],
-                ["Top Skill", "React"],
-                ["Top Career", "AI / ML"],
+                ["Total Users", displayValue(stats.totalUsers)],
+                ["Total Mentors", displayValue(stats.totalMentors)],
+                ["Career Paths", displayValue(stats.totalCareerPaths)],
                 ["Feedback Rate", "92%"],
               ].map(([label, value]) => (
                 <div

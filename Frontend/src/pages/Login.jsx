@@ -1,19 +1,36 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginAdmin } from "../services/authService";
 
 function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
-    if (isLoggedIn) {
+    const token = localStorage.getItem("token");
+
+    if (isLoggedIn && token) {
       navigate("/dashboard");
     }
   }, [navigate]);
 
-  const handleLogin = () => {
-    localStorage.setItem("adminLoggedIn", "true");
-    navigate("/dashboard");
+  const handleLogin = async () => {
+    setError("");
+
+    try {
+      const data = await loginAdmin(email, password);
+
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("admin", JSON.stringify(data.admin));
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Invalid email or password");
+    }
   };
 
   return (
@@ -95,6 +112,8 @@ function Login() {
         <input
           type="email"
           placeholder="Admin Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           style={{
             width: "100%",
             padding: "15px 16px",
@@ -105,12 +124,15 @@ function Login() {
             fontSize: "15px",
             marginBottom: "14px",
             outline: "none",
+            boxSizing: "border-box",
           }}
         />
 
         <input
           type="password"
           placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           style={{
             width: "100%",
             padding: "15px 16px",
@@ -121,8 +143,22 @@ function Login() {
             fontSize: "15px",
             marginBottom: "18px",
             outline: "none",
+            boxSizing: "border-box",
           }}
         />
+
+        {error && (
+          <p
+            style={{
+              color: "#FCA5A5",
+              fontSize: "14px",
+              marginTop: "0",
+              marginBottom: "14px",
+            }}
+          >
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleLogin}

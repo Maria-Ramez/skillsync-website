@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoutes");
+const careerPathRoutes = require("./routes/careerPathRoutes");
+const userRoutes = require("./routes/userRoutes");
+const mentorRoutes = require("./routes/mentorRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 dotenv.config();
 
@@ -11,6 +15,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/careerpaths", careerPathRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/mentors", mentorRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
   res.send("SkillSync backend is running");
