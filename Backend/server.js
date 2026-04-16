@@ -8,6 +8,7 @@ const careerPathRoutes = require("./routes/careerPathRoutes");
 const userRoutes = require("./routes/userRoutes");
 const mentorRoutes = require("./routes/mentorRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const feedbackRoutes = require("./routes/feedbackRoutes");
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/careerpaths", careerPathRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/mentors", mentorRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 app.get("/", (req, res) => {
   res.send("SkillSync backend is running");

@@ -11,8 +11,19 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 
 function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
   const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
-  return isLoggedIn ? children : <Navigate to="/" replace />;
+
+  if (token && isLoggedIn) {
+    return children;
+  }
+
+  // Clean old or fake login data
+  localStorage.removeItem("token");
+  localStorage.removeItem("admin");
+  localStorage.removeItem("adminLoggedIn");
+
+  return <Navigate to="/" replace />;
 }
 
 function App() {

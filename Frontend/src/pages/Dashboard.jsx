@@ -25,7 +25,12 @@ function Dashboard() {
     totalUsers: 0,
     totalMentors: 0,
     totalCareerPaths: 0,
+    activeSessions: 0,
+    averageMentorRating: 0,
+    topFields: [],
+    recentMentors: [],
   });
+
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -49,6 +54,10 @@ function Dashboard() {
           totalUsers: data.totalUsers || 0,
           totalMentors: data.totalMentors || 0,
           totalCareerPaths: data.totalCareerPaths || 0,
+          activeSessions: data.activeSessions || 0,
+          averageMentorRating: data.averageMentorRating || 0,
+          topFields: data.topFields || [],
+          recentMentors: data.recentMentors || [],
         });
       } catch (error) {
         console.error("Failed to load dashboard stats:", error.message);
@@ -61,6 +70,25 @@ function Dashboard() {
   }, []);
 
   const displayValue = (value) => (loadingStats ? "..." : value);
+
+  const topFields =
+    stats.topFields.length > 0
+      ? stats.topFields
+      : [
+          { title: "No data yet", count: 0, subtitle: "No mentor fields found" },
+        ];
+
+  const recentMentors =
+    stats.recentMentors.length > 0
+      ? stats.recentMentors
+      : [
+          {
+            name: "No activity yet",
+            area: "-",
+            status: "-",
+            sessions: "-",
+          },
+        ];
 
   return (
     <AdminLayout>
@@ -114,8 +142,8 @@ function Dashboard() {
         />
         <DashboardCard
           title="Active Sessions"
-          value="24"
-          subtitle="Live or scheduled"
+          value={displayValue(stats.activeSessions)}
+          subtitle="Total mentor sessions"
           accent="#F5A100"
         />
       </div>
@@ -154,7 +182,7 @@ function Dashboard() {
                   fontSize: "14px",
                 }}
               >
-                Top areas currently selected by users.
+                Top mentor specializations currently available.
               </p>
             </div>
 
@@ -164,13 +192,9 @@ function Dashboard() {
           </div>
 
           <div style={{ display: "grid", gap: "14px", marginBottom: "18px" }}>
-            {[
-              ["Web Development", "548", "enrolled users"],
-              ["Data Analysis", "620", "enrolled users"],
-              ["AI / ML", "850", "enrolled users"],
-            ].map(([title, value, subtitle]) => (
+            {topFields.map((item) => (
               <div
-                key={title}
+                key={item.title}
                 style={{
                   background: "rgba(255,255,255,0.02)",
                   border: "1px solid rgba(255,255,255,0.05)",
@@ -190,7 +214,7 @@ function Dashboard() {
                       marginBottom: "4px",
                     }}
                   >
-                    {title}
+                    {item.title}
                   </div>
                   <div
                     style={{
@@ -198,7 +222,7 @@ function Dashboard() {
                       fontSize: "13px",
                     }}
                   >
-                    {title}
+                    {item.title}
                   </div>
                 </div>
 
@@ -210,7 +234,7 @@ function Dashboard() {
                     textAlign: "center",
                   }}
                 >
-                  {value}
+                  {displayValue(item.count)}
                 </div>
 
                 <div
@@ -220,7 +244,7 @@ function Dashboard() {
                     textAlign: "right",
                   }}
                 >
-                  {subtitle}
+                  {item.subtitle}
                 </div>
               </div>
             ))}
@@ -253,7 +277,7 @@ function Dashboard() {
             >
               <thead>
                 <tr style={{ textAlign: "left" }}>
-                  {["Name", "Area", "Status", "Progress"].map((item) => (
+                  {["Name", "Area", "Status", "Sessions"].map((item) => (
                     <th
                       key={item}
                       style={{
@@ -269,12 +293,8 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ["John Doe", "Web Development", "Active", "75%"],
-                  ["Mariam Ali", "Data Analysis", "Active", "58%"],
-                  ["Omar Ahmed", "AI / ML", "Pending", "41%"],
-                ].map(([name, area, status, progress]) => (
-                  <tr key={name}>
+                {recentMentors.map((mentor, index) => (
+                  <tr key={`${mentor.name}-${index}`}>
                     <td
                       style={{
                         color: "#F9FAFB",
@@ -283,7 +303,7 @@ function Dashboard() {
                         borderTop: "1px solid rgba(255,255,255,0.05)",
                       }}
                     >
-                      {name}
+                      {mentor.name}
                     </td>
                     <td
                       style={{
@@ -293,7 +313,7 @@ function Dashboard() {
                         borderTop: "1px solid rgba(255,255,255,0.05)",
                       }}
                     >
-                      {area}
+                      {mentor.area}
                     </td>
                     <td
                       style={{
@@ -307,7 +327,7 @@ function Dashboard() {
                           padding: "6px 14px",
                           borderRadius: "999px",
                           background:
-                            status === "Active"
+                            mentor.status === "Active"
                               ? "rgba(245,161,0,0.16)"
                               : "rgba(255,255,255,0.08)",
                           color: "#F9FAFB",
@@ -315,7 +335,7 @@ function Dashboard() {
                           fontWeight: "700",
                         }}
                       >
-                        {status}
+                        {mentor.status}
                       </span>
                     </td>
                     <td
@@ -327,7 +347,7 @@ function Dashboard() {
                         borderTop: "1px solid rgba(255,255,255,0.05)",
                       }}
                     >
-                      {progress}
+                      {mentor.sessions}
                     </td>
                   </tr>
                 ))}
@@ -364,7 +384,7 @@ function Dashboard() {
                   borderRadius: "50%",
                   margin: "0 auto",
                   background:
-                    "conic-gradient(#F5A100 0% 28%, #7DB3D1 28% 58%, #B0D6EA 58% 78%, #284d63 78% 100%)",
+                    "conic-gradient(#F5A100 0% 33%, #7DB3D1 33% 66%, #B0D6EA 66% 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -389,34 +409,60 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "end",
-                  justifyContent: "center",
-                  gap: "10px",
-                  height: "150px",
-                }}
-              >
-                {[48, 82, 62, 96, 118, 80].map((height, i) => (
-                  <div key={i} style={{ textAlign: "center" }}>
+              <div style={{ display: "grid", gap: "12px" }}>
+                {topFields.map((item, index) => (
+                  <div
+                    key={item.title}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      background: "rgba(255,255,255,0.025)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: "16px",
+                      padding: "12px 14px",
+                    }}
+                  >
                     <div
                       style={{
-                        width: "12px",
-                        height: `${height}px`,
-                        borderRadius: "999px",
-                        background: i % 2 === 0 ? "#F5A100" : "#7DB3D1",
-                        marginBottom: "10px",
-                      }}
-                    />
-                    <div
-                      style={{
-                        color: "rgba(249,250,251,0.55)",
-                        fontSize: "11px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
                       }}
                     >
-                      {["Jan", "Feb", "Mar", "Apr", "May", "Jun"][i]}
+                      <div
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          borderRadius: "50%",
+                          background:
+                            index === 0
+                              ? "#F5A100"
+                              : index === 1
+                              ? "#7DB3D1"
+                              : "#B0D6EA",
+                        }}
+                      />
+                      <span
+                        style={{
+                          color: "rgba(249,250,251,0.72)",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {item.title}
+                      </span>
                     </div>
+
+                    <span
+                      style={{
+                        color: "#F9FAFB",
+                        fontSize: "15px",
+                        fontWeight: "800",
+                      }}
+                    >
+                      {displayValue(item.count)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -440,7 +486,7 @@ function Dashboard() {
                 ["Total Users", displayValue(stats.totalUsers)],
                 ["Total Mentors", displayValue(stats.totalMentors)],
                 ["Career Paths", displayValue(stats.totalCareerPaths)],
-                ["Feedback Rate", "92%"],
+                ["Average Rating", displayValue(stats.averageMentorRating)],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -495,7 +541,7 @@ function Dashboard() {
               marginBottom: "18px",
             }}
           >
-            Sessions Trend
+            Sessions Overview
           </div>
 
           <div
@@ -505,53 +551,47 @@ function Dashboard() {
               background:
                 "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)",
               border: "1px solid rgba(255,255,255,0.05)",
-              padding: "16px",
-              overflow: "hidden",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
             }}
           >
-            <svg
-              width="100%"
-              height="100%"
-              viewBox="0 0 700 240"
-              preserveAspectRatio="none"
+            <div
+              style={{
+                color: "#F5A100",
+                fontSize: "48px",
+                fontWeight: "800",
+                lineHeight: 1,
+                marginBottom: "12px",
+              }}
             >
-              <defs>
-                <linearGradient id="lineGlow1" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#F5A100" />
-                  <stop offset="100%" stopColor="#FFE3A6" />
-                </linearGradient>
-                <linearGradient id="lineGlow2" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#8FC5E0" />
-                  <stop offset="100%" stopColor="#F9FAFB" />
-                </linearGradient>
-              </defs>
+              {displayValue(stats.activeSessions)}
+            </div>
 
-              <path
-                d="M 0 190 C 80 150, 120 95, 190 120 S 320 210, 390 135 S 540 65, 700 115"
-                fill="none"
-                stroke="url(#lineGlow1)"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 0 165 C 90 175, 145 110, 210 130 S 350 185, 420 150 S 560 80, 700 95"
-                fill="none"
-                stroke="url(#lineGlow2)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
+            <div
+              style={{
+                color: "#F9FAFB",
+                fontSize: "18px",
+                fontWeight: "700",
+                marginBottom: "8px",
+              }}
+            >
+              Total Mentor Sessions
+            </div>
 
-              <circle cx="390" cy="135" r="7" fill="#F5A100" />
-              <circle cx="700" cy="115" r="7" fill="#F9FAFB" />
-
-              <text x="10" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">Jan</text>
-              <text x="120" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">Feb</text>
-              <text x="235" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">Mar</text>
-              <text x="350" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">Apr</text>
-              <text x="470" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">May</text>
-              <text x="590" y="228" fill="rgba(249,250,251,0.55)" fontSize="12">Jun</text>
-            </svg>
+            <div
+              style={{
+                color: "rgba(249,250,251,0.58)",
+                fontSize: "14px",
+                maxWidth: "360px",
+                lineHeight: 1.6,
+              }}
+            >
+              This value is currently based on the total sessions stored for all mentors in the dashboard database.
+            </div>
           </div>
         </SectionCard>
 
@@ -577,32 +617,37 @@ function Dashboard() {
               padding: "14px 6px 0",
             }}
           >
-            {[95, 140, 112, 165, 185, 150].map((height, i) => (
-              <div key={i} style={{ flex: 1, textAlign: "center" }}>
-                <div
-                  style={{
-                    width: "100%",
-                    height: `${height}px`,
-                    borderRadius: "18px 18px 8px 8px",
-                    background:
-                      i % 2 === 0
-                        ? "linear-gradient(180deg, #F5A100 0%, #C58000 100%)"
-                        : "linear-gradient(180deg, #7DB3D1 0%, #355D75 100%)",
-                    boxShadow: "0 10px 16px rgba(0,0,0,0.12)",
-                  }}
-                />
-                <div
-                  style={{
-                    marginTop: "10px",
-                    color: "rgba(249,250,251,0.55)",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                  }}
-                >
-                  {["Jan", "Feb", "Mar", "Apr", "May", "Jun"][i]}
+            {topFields.map((item, i) => {
+              const safeMax = Math.max(...topFields.map((field) => field.count), 1);
+              const height = Math.max((item.count / safeMax) * 180, 30);
+
+              return (
+                <div key={item.title} style={{ flex: 1, textAlign: "center" }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: `${height}px`,
+                      borderRadius: "18px 18px 8px 8px",
+                      background:
+                        i % 2 === 0
+                          ? "linear-gradient(180deg, #F5A100 0%, #C58000 100%)"
+                          : "linear-gradient(180deg, #7DB3D1 0%, #355D75 100%)",
+                      boxShadow: "0 10px 16px rgba(0,0,0,0.12)",
+                    }}
+                  />
+                  <div
+                    style={{
+                      marginTop: "10px",
+                      color: "rgba(249,250,251,0.55)",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.title}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </SectionCard>
       </div>
