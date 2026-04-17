@@ -37,16 +37,6 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-        <div className="sidebar-footer-card">
-          <div className="sidebar-footer-title">SkillSync Insights</div>
-          <div className="sidebar-footer-text">
-            View platform growth, mentor activity, and learning trends from one place.
-          </div>
-          <button className="sidebar-footer-btn">Open Overview</button>
-        </div>
-      </div>
     </aside>
   );
 }

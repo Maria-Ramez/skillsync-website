@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 function Navbar() {
   const navigate = useNavigate();
 
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
@@ -46,6 +50,8 @@ function Navbar() {
 
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <button
+          onClick={handleReload}
+          title="Reload page"
           style={{
             width: "34px",
             height: "34px",
