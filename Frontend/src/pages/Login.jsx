@@ -1,197 +1,184 @@
+import AdminLayout from "../layouts/AdminLayout";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-function Login() {
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+function Users() {
+  const [users, setUsers] = useState([]);
+  const [themeMode, setThemeMode] = useState("Dark");
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
-    const token = localStorage.getItem("token");
-
-    if (isLoggedIn && token) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
-
-  const handleLogin = async () => {
-    setError("");
-
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+    const loadTheme = () => {
+      const saved = localStorage.getItem("adminSettings");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setThemeMode(parsed.themeMode || "Dark");
+        } catch {}
       }
+    };
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("admin", JSON.stringify(data.admin));
-      localStorage.setItem("adminLoggedIn", "true");
+    loadTheme();
+    window.addEventListener("storage", loadTheme);
+    window.addEventListener("admin-theme-change", loadTheme);
 
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Invalid email or password");
-    }
-  };
+    return () => {
+      window.removeEventListener("storage", loadTheme);
+      window.removeEventListener("admin-theme-change", loadTheme);
+    };
+  }, []);
+
+  const isLight = themeMode === "Light";
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "24px",
-        background:
-          "radial-gradient(circle at top left, rgba(245,161,0,0.10), transparent 20%), linear-gradient(135deg, #0d1a22 0%, #132733 45%, #183847 100%)",
-      }}
-    >
-      <div
-        style={{
-          width: "420px",
-          borderRadius: "30px",
-          padding: "36px",
-          background:
-            "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 20px 45px rgba(0,0,0,0.22)",
-        }}
-      >
-        <div style={{ marginBottom: "24px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "18px",
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="SkillSync Logo"
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "12px",
-                background: "rgba(255,255,255,0.06)",
-                padding: "6px",
-              }}
-            />
-            <span
-              style={{
-                color: "#F9FAFB",
-                fontSize: "24px",
-                fontWeight: "800",
-              }}
-            >
-              SkillSync
-            </span>
-          </div>
-
-          <h1
-            style={{
-              color: "#F9FAFB",
-              fontSize: "32px",
-              fontWeight: "800",
-              margin: 0,
-            }}
-          >
-            Admin Login
-          </h1>
-
-          <p
-            style={{
-              marginTop: "8px",
-              color: "rgba(249,250,251,0.62)",
-              fontSize: "15px",
-            }}
-          >
-            Sign in to access the dashboard.
-          </p>
-        </div>
-
-        <input
-          type="email"
-          placeholder="Admin Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+    <AdminLayout>
+      <div style={{ marginBottom: "22px" }}>
+        <h1
           style={{
-            width: "100%",
-            padding: "15px 16px",
-            borderRadius: "14px",
-            border: "1px solid rgba(255,255,255,0.07)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#F9FAFB",
-            fontSize: "15px",
-            marginBottom: "14px",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "15px 16px",
-            borderRadius: "14px",
-            border: "1px solid rgba(255,255,255,0.07)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#F9FAFB",
-            fontSize: "15px",
-            marginBottom: "18px",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
-        />
-
-        {error && (
-          <p
-            style={{
-              color: "#FCA5A5",
-              fontSize: "14px",
-              marginTop: "0",
-              marginBottom: "14px",
-            }}
-          >
-            {error}
-          </p>
-        )}
-
-        <button
-          onClick={handleLogin}
-          style={{
-            width: "100%",
-            padding: "15px",
-            border: "none",
-            borderRadius: "14px",
-            background: "linear-gradient(180deg, #F5A100 0%, #D68C00 100%)",
-            color: "#102632",
-            fontSize: "16px",
+            color: isLight ? "#0f172a" : "#F9FAFB",
+            fontSize: "32px",
             fontWeight: "800",
-            cursor: "pointer",
-            boxShadow: "0 14px 24px rgba(245,161,0,0.18)",
+            margin: 0,
           }}
         >
-          Login
-        </button>
+          User Management
+        </h1>
+
+        <p
+          style={{
+            color: isLight
+              ? "rgba(15,23,42,0.6)"
+              : "rgba(249,250,251,0.6)",
+            marginTop: "8px",
+            fontSize: "15px",
+          }}
+        >
+          View and manage all registered users.
+        </p>
       </div>
-    </div>
+
+      {/* MAIN CARD */}
+      <div
+        style={{
+          borderRadius: "28px",
+          padding: "24px",
+          transition: "all 0.25s ease",
+
+          background: isLight
+            ? "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"
+            : "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
+
+          border: isLight
+            ? "1px solid rgba(15,23,42,0.08)"
+            : "1px solid rgba(255,255,255,0.05)",
+
+          boxShadow: isLight
+            ? "0 10px 24px rgba(15,23,42,0.08)"
+            : "0 12px 26px rgba(0,0,0,0.15)",
+        }}
+      >
+        {/* SEARCH */}
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            marginBottom: "18px",
+          }}
+        >
+          <input
+            placeholder="Search by name or email"
+            style={{
+              flex: 1,
+              padding: "14px 16px",
+              borderRadius: "14px",
+              border: isLight
+                ? "1px solid rgba(15,23,42,0.1)"
+                : "1px solid rgba(255,255,255,0.07)",
+
+              background: isLight
+                ? "rgba(15,23,42,0.03)"
+                : "rgba(255,255,255,0.03)",
+
+              color: isLight ? "#0f172a" : "#F9FAFB",
+              outline: "none",
+            }}
+          />
+
+          <button
+            style={{
+              padding: "0 18px",
+              borderRadius: "12px",
+              border: "none",
+              background: "#F5A100",
+              color: "#102632",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
+          >
+            Search
+          </button>
+        </div>
+
+        {/* TABLE */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ textAlign: "left" }}>
+              {["Name", "Email", "Role", "Status", "Actions"].map((item) => (
+                <th
+                  key={item}
+                  style={{
+                    color: isLight
+                      ? "rgba(15,23,42,0.55)"
+                      : "rgba(249,250,251,0.52)",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    paddingBottom: "14px",
+                  }}
+                >
+                  {item}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan="5">
+                  <div
+                    style={{
+                      padding: "20px 0",
+                      color: isLight
+                        ? "#64748b"
+                        : "rgba(255,255,255,0.6)",
+                    }}
+                  >
+                    No users found.
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr key={user._id}>
+                  <td style={cellStyle(isLight)}>{user.name}</td>
+                  <td style={cellStyle(isLight)}>{user.email}</td>
+                  <td style={cellStyle(isLight)}>{user.role}</td>
+                  <td style={cellStyle(isLight)}>{user.status}</td>
+                  <td style={cellStyle(isLight)}>...</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </AdminLayout>
   );
 }
 
-export default Login;
+const cellStyle = (isLight) => ({
+  padding: "16px 0",
+  borderTop: isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)",
+  color: isLight ? "#0f172a" : "#F9FAFB",
+});
+
+export default Users;

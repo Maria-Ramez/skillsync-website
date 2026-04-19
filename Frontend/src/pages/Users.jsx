@@ -6,6 +6,30 @@ function Users() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [themeMode, setThemeMode] = useState("Dark");
+
+useEffect(() => {
+  const loadTheme = () => {
+    const saved = localStorage.getItem("adminSettings");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setThemeMode(parsed.themeMode || "Dark");
+      } catch {}
+    }
+  };
+
+  loadTheme();
+  window.addEventListener("storage", loadTheme);
+  window.addEventListener("admin-theme-change", loadTheme);
+
+  return () => {
+    window.removeEventListener("storage", loadTheme);
+    window.removeEventListener("admin-theme-change", loadTheme);
+  };
+}, []);
+
+const isLight = themeMode === "Light";
 
   const [modalType, setModalType] = useState(null); // "block" | "unblock" | "delete" | "details" | null
   const [selectedUser, setSelectedUser] = useState(null);
@@ -223,7 +247,7 @@ function Users() {
       <div style={{ marginBottom: "22px" }}>
         <h1
           style={{
-            color: "#F9FAFB",
+            color: isLight ? "#0f172a" : "#F9FAFB",
             fontSize: "32px",
             fontWeight: "800",
             margin: 0,
@@ -233,7 +257,7 @@ function Users() {
         </h1>
         <p
           style={{
-            color: "rgba(249,250,251,0.6)",
+            color: isLight ? "#64748b" : "rgba(249,250,251,0.6)",
             marginTop: "8px",
             fontSize: "15px",
           }}
@@ -244,8 +268,9 @@ function Users() {
 
       <div
         style={{
-          background:
-            "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
+          background: isLight
+          ? "#ffffff"
+          : "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
           borderRadius: "28px",
           padding: "24px",
           border: "1px solid rgba(255,255,255,0.05)",

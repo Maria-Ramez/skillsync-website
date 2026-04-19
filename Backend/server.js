@@ -12,6 +12,7 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 
 dotenv.config();
+console.log("Mongo URI:", process.env.MONGO_URI);
 
 const app = express();
 

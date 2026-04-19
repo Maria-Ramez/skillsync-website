@@ -21,6 +21,30 @@ function Mentors() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [mentorToDelete, setMentorToDelete] = useState(null);
+  const [themeMode, setThemeMode] = useState("Dark");
+
+   useEffect(() => {
+     const loadTheme = () => {
+     const saved = localStorage.getItem("adminSettings");
+       if (saved) {
+         try {
+         const parsed = JSON.parse(saved);
+         setThemeMode(parsed.themeMode || "Dark");
+        } catch {}
+       }
+      };
+
+     loadTheme();
+     window.addEventListener("storage", loadTheme);
+     window.addEventListener("admin-theme-change", loadTheme);
+
+     return () => {
+      window.removeEventListener("storage", loadTheme);
+      window.removeEventListener("admin-theme-change", loadTheme);
+     };
+  }, []);
+
+  const isLight = themeMode === "Light";
 
   const token = localStorage.getItem("token");
 
@@ -198,6 +222,10 @@ function Mentors() {
           border: "1px solid rgba(255,255,255,0.05)",
           borderRadius: "20px",
           padding: "24px",
+          background: isLight ? "#ffffff" : "rgba(255,255,255,0.03)",
+          border: isLight
+          ? "1px solid rgba(15,23,42,0.08)"
+          : "1px solid rgba(255,255,255,0.05)",
         }}
       >
         {loading ? (

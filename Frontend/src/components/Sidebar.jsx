@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import "./sidebar.css";
 
-function Sidebar() {
+function Sidebar({ themeMode = "Dark" }) {
   const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: "⌂" },
     { path: "/users", label: "Users", icon: "◉" },
@@ -13,8 +13,11 @@ function Sidebar() {
     { path: "/settings", label: "Settings", icon: "⚙" },
   ];
 
+  const sidebarClass =
+    themeMode === "Light" ? "sidebar sidebar-light" : "sidebar sidebar-dark";
+
   return (
-    <aside className="sidebar">
+    <aside className={sidebarClass}>
       <div className="sidebar-brand">
         <img src="/logo.png" alt="SkillSync Logo" />
         <div className="sidebar-brand-text">

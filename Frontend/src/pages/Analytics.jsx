@@ -14,8 +14,35 @@ function Analytics() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [themeMode, setThemeMode] = useState("Dark");
 
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const loadTheme = () => {
+      const savedSettings = localStorage.getItem("adminSettings");
+
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings);
+          setThemeMode(parsed.themeMode || "Dark");
+        } catch (error) {
+          console.error("Failed to load theme settings:", error);
+        }
+      } else {
+        setThemeMode("Dark");
+      }
+    };
+
+    loadTheme();
+    window.addEventListener("storage", loadTheme);
+    window.addEventListener("admin-theme-change", loadTheme);
+
+    return () => {
+      window.removeEventListener("storage", loadTheme);
+      window.removeEventListener("admin-theme-change", loadTheme);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -54,6 +81,34 @@ function Analytics() {
     fetchAnalytics();
   }, [token]);
 
+  const isLight = themeMode === "Light";
+
+  const textPrimary = isLight ? "#0f172a" : "#F9FAFB";
+  const textSecondary = isLight
+    ? "rgba(15,23,42,0.62)"
+    : "rgba(249,250,251,0.6)";
+  const cardBackground = isLight
+    ? "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248,250,252,0.96) 100%)"
+    : "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)";
+  const cardBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const cardShadow = isLight
+    ? "0 12px 26px rgba(15,23,42,0.08)"
+    : "0 12px 26px rgba(0,0,0,0.15)";
+  const innerCardBackground = isLight
+    ? "rgba(255,255,255,0.72)"
+    : "rgba(255,255,255,0.03)";
+  const innerCardBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const labelColor = isLight
+    ? "rgba(15,23,42,0.72)"
+    : "rgba(249,250,251,0.68)";
+  const barLabelColor = isLight
+    ? "rgba(15,23,42,0.62)"
+    : "rgba(249,250,251,0.55)";
+
   const growthBars =
     analytics.growthBars.length > 0
       ? analytics.growthBars
@@ -82,7 +137,7 @@ function Analytics() {
       <div style={{ marginBottom: "22px" }}>
         <h1
           style={{
-            color: "#F9FAFB",
+            color: textPrimary,
             fontSize: "32px",
             fontWeight: "800",
             margin: 0,
@@ -92,7 +147,7 @@ function Analytics() {
         </h1>
         <p
           style={{
-            color: "rgba(249,250,251,0.6)",
+            color: textSecondary,
             marginTop: "8px",
             fontSize: "15px",
           }}
@@ -102,7 +157,7 @@ function Analytics() {
       </div>
 
       {loading ? (
-        <p style={{ color: "#F9FAFB", opacity: 0.8 }}>Loading analytics...</p>
+        <p style={{ color: textPrimary, opacity: 0.8 }}>Loading analytics...</p>
       ) : error ? (
         <p style={{ color: "#ff7d7d" }}>{error}</p>
       ) : (
@@ -113,8 +168,25 @@ function Analytics() {
             gap: "18px",
           }}
         >
-          <div style={cardStyle}>
-            <h3 style={titleStyle}>Platform Growth Overview</h3>
+          <div
+            style={{
+              background: cardBackground,
+              borderRadius: "28px",
+              padding: "24px",
+              border: cardBorder,
+              boxShadow: cardShadow,
+            }}
+          >
+            <h3
+              style={{
+                color: textPrimary,
+                fontSize: "22px",
+                fontWeight: "800",
+                marginBottom: "18px",
+              }}
+            >
+              Platform Growth Overview
+            </h3>
 
             <div
               style={{
@@ -141,13 +213,15 @@ function Analytics() {
                           i % 2 === 0
                             ? "linear-gradient(180deg, #F5A100 0%, #C58000 100%)"
                             : "linear-gradient(180deg, #7DB3D1 0%, #355D75 100%)",
-                        boxShadow: "0 10px 18px rgba(0,0,0,0.14)",
+                        boxShadow: isLight
+                          ? "0 10px 18px rgba(15,23,42,0.12)"
+                          : "0 10px 18px rgba(0,0,0,0.14)",
                       }}
                     />
                     <div
                       style={{
                         marginTop: "10px",
-                        color: "rgba(249,250,251,0.55)",
+                        color: barLabelColor,
                         fontSize: "12px",
                         fontWeight: "600",
                       }}
@@ -160,15 +234,43 @@ function Analytics() {
             </div>
           </div>
 
-          <div style={cardStyle}>
-            <h3 style={titleStyle}>Top Metrics</h3>
+          <div
+            style={{
+              background: cardBackground,
+              borderRadius: "28px",
+              padding: "24px",
+              border: cardBorder,
+              boxShadow: cardShadow,
+            }}
+          >
+            <h3
+              style={{
+                color: textPrimary,
+                fontSize: "22px",
+                fontWeight: "800",
+                marginBottom: "18px",
+              }}
+            >
+              Top Metrics
+            </h3>
 
             <div style={{ display: "grid", gap: "12px" }}>
               {analyticsMetrics.map(([label, value]) => (
-                <div key={label} style={miniCard}>
+                <div
+                  key={label}
+                  style={{
+                    background: innerCardBackground,
+                    border: innerCardBorder,
+                    borderRadius: "18px",
+                    padding: "16px 18px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <span
                     style={{
-                      color: "rgba(249,250,251,0.68)",
+                      color: labelColor,
                       fontSize: "15px",
                     }}
                   >
@@ -193,31 +295,5 @@ function Analytics() {
     </AdminLayout>
   );
 }
-
-const cardStyle = {
-  background:
-    "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
-  borderRadius: "28px",
-  padding: "24px",
-  border: "1px solid rgba(255,255,255,0.05)",
-  boxShadow: "0 12px 26px rgba(0,0,0,0.15)",
-};
-
-const titleStyle = {
-  color: "#F9FAFB",
-  fontSize: "22px",
-  fontWeight: "800",
-  marginBottom: "18px",
-};
-
-const miniCard = {
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.05)",
-  borderRadius: "18px",
-  padding: "16px 18px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-};
 
 export default Analytics;

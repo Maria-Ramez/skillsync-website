@@ -15,12 +15,86 @@ function CareerPaths() {
     resources: "",
   });
 
+  const [themeMode, setThemeMode] = useState("Dark");
+
   const token = localStorage.getItem("token");
 
   const authHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
+
+  useEffect(() => {
+    const loadTheme = () => {
+      const savedSettings = localStorage.getItem("adminSettings");
+
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings);
+          setThemeMode(parsed.themeMode || "Dark");
+        } catch (error) {
+          console.error("Failed to load theme settings:", error);
+        }
+      } else {
+        setThemeMode("Dark");
+      }
+    };
+
+    loadTheme();
+    window.addEventListener("storage", loadTheme);
+    window.addEventListener("admin-theme-change", loadTheme);
+
+    return () => {
+      window.removeEventListener("storage", loadTheme);
+      window.removeEventListener("admin-theme-change", loadTheme);
+    };
+  }, []);
+
+  const isLight = themeMode === "Light";
+
+  const textPrimary = isLight ? "#0f172a" : "#F9FAFB";
+  const textSecondary = isLight
+    ? "rgba(15,23,42,0.62)"
+    : "rgba(255,255,255,0.6)";
+  const tableTextSecondary = isLight
+    ? "rgba(15,23,42,0.72)"
+    : "rgba(255,255,255,0.75)";
+  const cardBackground = isLight
+    ? "rgba(255,255,255,0.82)"
+    : "rgba(255,255,255,0.03)";
+  const cardBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const modalBackground = isLight
+    ? "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.99) 100%)"
+    : "linear-gradient(180deg, rgba(20,53,70,0.97) 0%, rgba(16,38,50,0.99) 100%)";
+  const modalBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.08)";
+  const inputBackground = isLight
+    ? "rgba(255,255,255,0.9)"
+    : "rgba(255,255,255,0.03)";
+  const inputBorder = isLight
+    ? "1px solid rgba(15,23,42,0.12)"
+    : "1px solid rgba(255,255,255,0.12)";
+  const neutralButtonBackground = isLight
+    ? "rgba(15,23,42,0.04)"
+    : "rgba(255,255,255,0.02)";
+  const neutralButtonBorder = isLight
+    ? "1px solid rgba(15,23,42,0.12)"
+    : "1px solid rgba(255,255,255,0.12)";
+  const actionButtonBorder = isLight
+    ? "1px solid rgba(15,23,42,0.12)"
+    : "1px solid rgba(255,255,255,0.08)";
+  const rowBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const closeButtonColor = isLight
+    ? "rgba(15,23,42,0.45)"
+    : "rgba(255,255,255,0.55)";
+  const modalOverlay = isLight
+    ? "rgba(15, 23, 42, 0.28)"
+    : "rgba(5, 12, 18, 0.58)";
 
   const fetchCareerPaths = async () => {
     try {
@@ -187,18 +261,30 @@ function CareerPaths() {
   return (
     <AdminLayout>
       <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "26px", margin: 0 }}>Career Paths & Skills</h1>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px" }}>
+        <h1
+          style={{
+            fontSize: "26px",
+            margin: 0,
+            color: textPrimary,
+          }}
+        >
+          Career Paths & Skills
+        </h1>
+        <p style={{ color: textSecondary, fontSize: "14px" }}>
           Manage career tracks, required skills, and learning resources.
         </p>
       </div>
 
       <div
         style={{
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.05)",
+          background: cardBackground,
+          border: cardBorder,
           borderRadius: "20px",
           padding: "24px",
+          boxShadow: isLight
+            ? "0 12px 26px rgba(15,23,42,0.08)"
+            : "none",
+          transition: "all 0.25s ease",
         }}
       >
         <div
@@ -209,7 +295,15 @@ function CareerPaths() {
             marginBottom: "20px",
           }}
         >
-          <h3 style={{ fontSize: "18px", margin: 0 }}>Career Paths</h3>
+          <h3
+            style={{
+              fontSize: "18px",
+              margin: 0,
+              color: textPrimary,
+            }}
+          >
+            Career Paths
+          </h3>
 
           <button
             onClick={openAddModal}
@@ -218,6 +312,7 @@ function CareerPaths() {
               borderRadius: "12px",
               border: "none",
               background: "#F5A100",
+              color: "#102632",
               fontWeight: "600",
               cursor: "pointer",
             }}
@@ -227,7 +322,7 @@ function CareerPaths() {
         </div>
 
         {loading ? (
-          <p style={{ color: "rgba(255,255,255,0.75)" }}>
+          <p style={{ color: textPrimary, opacity: 0.8 }}>
             Loading career paths...
           </p>
         ) : error ? (
@@ -235,7 +330,14 @@ function CareerPaths() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)" }}>
+              <tr
+                style={{
+                  fontSize: "12px",
+                  color: isLight
+                    ? "rgba(15,23,42,0.55)"
+                    : "rgba(255,255,255,0.55)",
+                }}
+              >
                 <th align="left">Career Path</th>
                 <th align="left">Required Skills</th>
                 <th align="left">Resources</th>
@@ -245,19 +347,20 @@ function CareerPaths() {
 
             <tbody>
               {careers.map((career) => (
-                <tr
-                  key={career._id}
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  <td style={{ padding: "14px 0", fontWeight: "600" }}>
+                <tr key={career._id} style={{ borderTop: rowBorder }}>
+                  <td
+                    style={{
+                      padding: "14px 0",
+                      fontWeight: "600",
+                      color: textPrimary,
+                    }}
+                  >
                     {career.path}
                   </td>
 
-                  <td style={{ color: "rgba(255,255,255,0.75)" }}>
-                    {career.skills}
-                  </td>
+                  <td style={{ color: tableTextSecondary }}>{career.skills}</td>
 
-                  <td style={{ color: "rgba(255,255,255,0.75)" }}>
+                  <td style={{ color: tableTextSecondary }}>
                     {career.resources}
                   </td>
 
@@ -268,9 +371,9 @@ function CareerPaths() {
                         style={{
                           padding: "6px 12px",
                           borderRadius: "10px",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          border: actionButtonBorder,
                           background: "transparent",
-                          color: "#fff",
+                          color: textPrimary,
                           cursor: "pointer",
                         }}
                       >
@@ -282,7 +385,7 @@ function CareerPaths() {
                         style={{
                           padding: "6px 12px",
                           borderRadius: "10px",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          border: actionButtonBorder,
                           background: "transparent",
                           color: "#ff7d7d",
                           cursor: "pointer",
@@ -301,7 +404,7 @@ function CareerPaths() {
                     colSpan="4"
                     style={{
                       padding: "18px 0",
-                      color: "rgba(255,255,255,0.6)",
+                      color: textSecondary,
                     }}
                   >
                     No career paths found.
@@ -319,7 +422,7 @@ function CareerPaths() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(5, 12, 18, 0.58)",
+            background: modalOverlay,
             backdropFilter: "blur(5px)",
             WebkitBackdropFilter: "blur(5px)",
             display: "flex",
@@ -337,16 +440,19 @@ function CareerPaths() {
               maxWidth: modalType === "delete" ? "460px" : "560px",
               borderRadius: "24px",
               overflow: "hidden",
-              background:
-                "linear-gradient(180deg, rgba(20,53,70,0.97) 0%, rgba(16,38,50,0.99) 100%)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 24px 60px rgba(0,0,0,0.35)",
+              background: modalBackground,
+              border: modalBorder,
+              boxShadow: isLight
+                ? "0 24px 60px rgba(15,23,42,0.14)"
+                : "0 24px 60px rgba(0,0,0,0.35)",
               animation: "modalSlide 0.25s ease",
             }}
           >
             {modalType !== "delete" ? (
               <>
-                <div style={{ padding: "28px 28px 18px 28px", position: "relative" }}>
+                <div
+                  style={{ padding: "28px 28px 18px 28px", position: "relative" }}
+                >
                   <button
                     onClick={closeModal}
                     style={{
@@ -355,7 +461,7 @@ function CareerPaths() {
                       right: "18px",
                       background: "transparent",
                       border: "none",
-                      color: "rgba(255,255,255,0.55)",
+                      color: closeButtonColor,
                       fontSize: "34px",
                       lineHeight: 1,
                       cursor: "pointer",
@@ -367,7 +473,7 @@ function CareerPaths() {
                   <h2
                     style={{
                       margin: "4px 0 28px 0",
-                      color: "#F9FAFB",
+                      color: textPrimary,
                       fontSize: "24px",
                       fontWeight: "800",
                     }}
@@ -379,7 +485,7 @@ function CareerPaths() {
                     <label
                       style={{
                         display: "block",
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "14px",
                         marginBottom: "10px",
                       }}
@@ -396,9 +502,9 @@ function CareerPaths() {
                         width: "100%",
                         padding: "16px 18px",
                         borderRadius: "14px",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "#F9FAFB",
+                        border: inputBorder,
+                        background: inputBackground,
+                        color: textPrimary,
                         fontSize: "15px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -410,7 +516,7 @@ function CareerPaths() {
                     <label
                       style={{
                         display: "block",
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "14px",
                         marginBottom: "10px",
                       }}
@@ -427,9 +533,9 @@ function CareerPaths() {
                         width: "100%",
                         padding: "16px 18px",
                         borderRadius: "14px",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "#F9FAFB",
+                        border: inputBorder,
+                        background: inputBackground,
+                        color: textPrimary,
                         fontSize: "15px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -441,7 +547,7 @@ function CareerPaths() {
                     <label
                       style={{
                         display: "block",
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "14px",
                         marginBottom: "10px",
                       }}
@@ -458,9 +564,9 @@ function CareerPaths() {
                         width: "100%",
                         padding: "16px 18px",
                         borderRadius: "14px",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "#F9FAFB",
+                        border: inputBorder,
+                        background: inputBackground,
+                        color: textPrimary,
                         fontSize: "15px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -475,16 +581,23 @@ function CareerPaths() {
                     justifyContent: "flex-end",
                     gap: "12px",
                     padding: "18px 28px 22px 28px",
-                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    borderTop: isLight
+                      ? "1px solid rgba(15,23,42,0.08)"
+                      : "1px solid rgba(255,255,255,0.08)",
                   }}
                 >
                   <button
-                    onClick={modalType === "add" ? handleAddCareerPath : handleEditCareerPath}
+                    onClick={
+                      modalType === "add"
+                        ? handleAddCareerPath
+                        : handleEditCareerPath
+                    }
                     style={{
                       padding: "12px 32px",
                       borderRadius: "14px",
                       border: "none",
-                      background: "linear-gradient(180deg, #F5A100 0%, #D68C00 100%)",
+                      background:
+                        "linear-gradient(180deg, #F5A100 0%, #D68C00 100%)",
                       color: "#102632",
                       fontSize: "15px",
                       fontWeight: "800",
@@ -499,9 +612,9 @@ function CareerPaths() {
                     style={{
                       padding: "12px 24px",
                       borderRadius: "14px",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      background: "rgba(255,255,255,0.02)",
-                      color: "#F9FAFB",
+                      border: neutralButtonBorder,
+                      background: neutralButtonBackground,
+                      color: textPrimary,
                       fontSize: "15px",
                       cursor: "pointer",
                     }}
@@ -521,7 +634,7 @@ function CareerPaths() {
                       right: "18px",
                       background: "transparent",
                       border: "none",
-                      color: "rgba(255,255,255,0.55)",
+                      color: closeButtonColor,
                       fontSize: "34px",
                       lineHeight: 1,
                       cursor: "pointer",
@@ -533,7 +646,7 @@ function CareerPaths() {
                   <h2
                     style={{
                       margin: "4px 0 14px 0",
-                      color: "#F9FAFB",
+                      color: textPrimary,
                       fontSize: "24px",
                       fontWeight: "800",
                     }}
@@ -544,13 +657,15 @@ function CareerPaths() {
                   <p
                     style={{
                       margin: 0,
-                      color: "rgba(249,250,251,0.72)",
+                      color: isLight
+                        ? "rgba(15,23,42,0.72)"
+                        : "rgba(249,250,251,0.72)",
                       fontSize: "15px",
                       lineHeight: 1.7,
                     }}
                   >
                     Are you sure you want to delete{" "}
-                    <span style={{ color: "#F9FAFB", fontWeight: "700" }}>
+                    <span style={{ color: textPrimary, fontWeight: "700" }}>
                       {selectedCareer?.path}
                     </span>
                     ? This action cannot be undone.
@@ -563,7 +678,9 @@ function CareerPaths() {
                     justifyContent: "flex-end",
                     gap: "12px",
                     padding: "18px 28px 22px 28px",
-                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    borderTop: isLight
+                      ? "1px solid rgba(15,23,42,0.08)"
+                      : "1px solid rgba(255,255,255,0.08)",
                   }}
                 >
                   <button
@@ -572,7 +689,8 @@ function CareerPaths() {
                       padding: "12px 28px",
                       borderRadius: "14px",
                       border: "none",
-                      background: "linear-gradient(180deg, #ff7d7d 0%, #e35d5d 100%)",
+                      background:
+                        "linear-gradient(180deg, #ff7d7d 0%, #e35d5d 100%)",
                       color: "#fff",
                       fontSize: "15px",
                       fontWeight: "800",
@@ -587,9 +705,9 @@ function CareerPaths() {
                     style={{
                       padding: "12px 24px",
                       borderRadius: "14px",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      background: "rgba(255,255,255,0.02)",
-                      color: "#F9FAFB",
+                      border: neutralButtonBorder,
+                      background: neutralButtonBackground,
+                      color: textPrimary,
                       fontSize: "15px",
                       cursor: "pointer",
                     }}

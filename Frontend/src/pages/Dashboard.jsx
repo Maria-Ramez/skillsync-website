@@ -2,24 +2,6 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/AdminLayout";
 import DashboardCard from "../components/DashboardCard";
 
-function SectionCard({ children, style = {} }) {
-  return (
-    <div
-      style={{
-        background:
-          "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)",
-        borderRadius: "28px",
-        padding: "24px",
-        border: "1px solid rgba(255,255,255,0.05)",
-        boxShadow: "0 12px 26px rgba(0,0,0,0.15)",
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
 function Dashboard() {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -32,6 +14,33 @@ function Dashboard() {
   });
 
   const [loadingStats, setLoadingStats] = useState(true);
+  const [themeMode, setThemeMode] = useState("Dark");
+
+  useEffect(() => {
+    const loadTheme = () => {
+      const savedSettings = localStorage.getItem("adminSettings");
+
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings);
+          setThemeMode(parsed.themeMode || "Dark");
+        } catch (error) {
+          console.error("Failed to load theme settings:", error);
+        }
+      } else {
+        setThemeMode("Dark");
+      }
+    };
+
+    loadTheme();
+    window.addEventListener("storage", loadTheme);
+    window.addEventListener("admin-theme-change", loadTheme);
+
+    return () => {
+      window.removeEventListener("storage", loadTheme);
+      window.removeEventListener("admin-theme-change", loadTheme);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -69,6 +78,44 @@ function Dashboard() {
     fetchDashboardStats();
   }, []);
 
+  const isLight = themeMode === "Light";
+
+  const textPrimary = isLight ? "#0f172a" : "#F9FAFB";
+  const textSecondary = isLight
+    ? "rgba(15,23,42,0.62)"
+    : "rgba(249,250,251,0.6)";
+  const textMuted = isLight
+    ? "rgba(15,23,42,0.55)"
+    : "rgba(249,250,251,0.55)";
+  const textSoft = isLight
+    ? "rgba(15,23,42,0.72)"
+    : "rgba(249,250,251,0.75)";
+  const sectionCardBackground = isLight
+    ? "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248,250,252,0.96) 100%)"
+    : "linear-gradient(180deg, rgba(20,53,70,0.95) 0%, rgba(16,38,50,0.98) 100%)";
+  const sectionCardBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const sectionCardShadow = isLight
+    ? "0 12px 26px rgba(15,23,42,0.08)"
+    : "0 12px 26px rgba(0,0,0,0.15)";
+  const innerCardBackground = isLight
+    ? "rgba(255,255,255,0.74)"
+    : "rgba(255,255,255,0.02)";
+  const innerCardBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const miniStatBackground = isLight
+    ? "rgba(255,255,255,0.74)"
+    : "rgba(255,255,255,0.025)";
+  const miniStatBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+  const donutInnerBg = isLight ? "#ffffff" : "#143546";
+  const rowBorder = isLight
+    ? "1px solid rgba(15,23,42,0.08)"
+    : "1px solid rgba(255,255,255,0.05)";
+
   const displayValue = (value) => (loadingStats ? "..." : value);
 
   const topFields =
@@ -90,6 +137,22 @@ function Dashboard() {
           },
         ];
 
+  const SectionCard = ({ children, style = {} }) => (
+    <div
+      style={{
+        background: sectionCardBackground,
+        borderRadius: "28px",
+        padding: "24px",
+        border: sectionCardBorder,
+        boxShadow: sectionCardShadow,
+        transition: "all 0.25s ease",
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <AdminLayout>
       <div style={{ marginBottom: "22px" }}>
@@ -97,7 +160,7 @@ function Dashboard() {
           style={{
             fontSize: "34px",
             fontWeight: "800",
-            color: "#F9FAFB",
+            color: textPrimary,
             margin: 0,
           }}
         >
@@ -106,7 +169,7 @@ function Dashboard() {
         <p
           style={{
             marginTop: "8px",
-            color: "rgba(249,250,251,0.6)",
+            color: textSecondary,
             fontSize: "15px",
           }}
         >
@@ -170,7 +233,7 @@ function Dashboard() {
                 style={{
                   fontSize: "20px",
                   fontWeight: "800",
-                  color: "#F9FAFB",
+                  color: textPrimary,
                   marginBottom: "6px",
                 }}
               >
@@ -178,7 +241,9 @@ function Dashboard() {
               </h3>
               <p
                 style={{
-                  color: "rgba(249,250,251,0.58)",
+                  color: isLight
+                    ? "rgba(15,23,42,0.58)"
+                    : "rgba(249,250,251,0.58)",
                   fontSize: "14px",
                 }}
               >
@@ -186,7 +251,7 @@ function Dashboard() {
               </p>
             </div>
 
-            <div style={{ color: "rgba(249,250,251,0.3)", fontSize: "24px" }}>
+            <div style={{ color: isLight ? "rgba(15,23,42,0.25)" : "rgba(249,250,251,0.3)", fontSize: "24px" }}>
               • •
             </div>
           </div>
@@ -196,8 +261,8 @@ function Dashboard() {
               <div
                 key={item.title}
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.05)",
+                  background: innerCardBackground,
+                  border: innerCardBorder,
                   borderRadius: "18px",
                   padding: "18px 20px",
                   display: "grid",
@@ -208,7 +273,7 @@ function Dashboard() {
                 <div>
                   <div
                     style={{
-                      color: "#F9FAFB",
+                      color: textPrimary,
                       fontSize: "18px",
                       fontWeight: "700",
                       marginBottom: "4px",
@@ -218,7 +283,9 @@ function Dashboard() {
                   </div>
                   <div
                     style={{
-                      color: "rgba(249,250,251,0.5)",
+                      color: isLight
+                        ? "rgba(15,23,42,0.5)"
+                        : "rgba(249,250,251,0.5)",
                       fontSize: "13px",
                     }}
                   >
@@ -228,7 +295,7 @@ function Dashboard() {
 
                 <div
                   style={{
-                    color: "#F9FAFB",
+                    color: textPrimary,
                     fontSize: "22px",
                     fontWeight: "800",
                     textAlign: "center",
@@ -239,7 +306,9 @@ function Dashboard() {
 
                 <div
                   style={{
-                    color: "rgba(249,250,251,0.62)",
+                    color: isLight
+                      ? "rgba(15,23,42,0.62)"
+                      : "rgba(249,250,251,0.62)",
                     fontSize: "14px",
                     textAlign: "right",
                   }}
@@ -252,15 +321,15 @@ function Dashboard() {
 
           <div
             style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: innerCardBackground,
+              border: innerCardBorder,
               borderRadius: "22px",
               padding: "20px",
             }}
           >
             <div
               style={{
-                color: "#F9FAFB",
+                color: textPrimary,
                 fontSize: "19px",
                 fontWeight: "800",
                 marginBottom: "16px",
@@ -281,7 +350,9 @@ function Dashboard() {
                     <th
                       key={item}
                       style={{
-                        color: "rgba(249,250,251,0.52)",
+                        color: isLight
+                          ? "rgba(15,23,42,0.52)"
+                          : "rgba(249,250,251,0.52)",
                         fontSize: "13px",
                         fontWeight: "600",
                         paddingBottom: "14px",
@@ -297,20 +368,20 @@ function Dashboard() {
                   <tr key={`${mentor.name}-${index}`}>
                     <td
                       style={{
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "15px",
                         padding: "14px 0",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: rowBorder,
                       }}
                     >
                       {mentor.name}
                     </td>
                     <td
                       style={{
-                        color: "rgba(249,250,251,0.75)",
+                        color: textSoft,
                         fontSize: "15px",
                         padding: "14px 0",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: rowBorder,
                       }}
                     >
                       {mentor.area}
@@ -318,7 +389,7 @@ function Dashboard() {
                     <td
                       style={{
                         padding: "14px 0",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: rowBorder,
                       }}
                     >
                       <span
@@ -329,8 +400,14 @@ function Dashboard() {
                           background:
                             mentor.status === "Active"
                               ? "rgba(245,161,0,0.16)"
+                              : isLight
+                              ? "rgba(15,23,42,0.06)"
                               : "rgba(255,255,255,0.08)",
-                          color: "#F9FAFB",
+                          color: mentor.status === "Active"
+                            ? isLight
+                              ? "#9a6700"
+                              : "#F9FAFB"
+                            : textPrimary,
                           fontSize: "13px",
                           fontWeight: "700",
                         }}
@@ -340,11 +417,11 @@ function Dashboard() {
                     </td>
                     <td
                       style={{
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "15px",
                         fontWeight: "700",
                         padding: "14px 0",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: rowBorder,
                       }}
                     >
                       {mentor.sessions}
@@ -360,7 +437,7 @@ function Dashboard() {
           <SectionCard>
             <div
               style={{
-                color: "#F9FAFB",
+                color: textPrimary,
                 fontSize: "20px",
                 fontWeight: "800",
                 marginBottom: "18px",
@@ -388,7 +465,9 @@ function Dashboard() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "inset 0 0 30px rgba(0,0,0,0.18)",
+                  boxShadow: isLight
+                    ? "inset 0 0 30px rgba(15,23,42,0.10)"
+                    : "inset 0 0 30px rgba(0,0,0,0.18)",
                 }}
               >
                 <div
@@ -396,11 +475,11 @@ function Dashboard() {
                     width: "96px",
                     height: "96px",
                     borderRadius: "50%",
-                    background: "#143546",
+                    background: donutInnerBg,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#F9FAFB",
+                    color: textPrimary,
                     fontSize: "20px",
                     fontWeight: "800",
                   }}
@@ -417,8 +496,8 @@ function Dashboard() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      background: "rgba(255,255,255,0.025)",
-                      border: "1px solid rgba(255,255,255,0.05)",
+                      background: miniStatBackground,
+                      border: miniStatBorder,
                       borderRadius: "16px",
                       padding: "12px 14px",
                     }}
@@ -445,7 +524,9 @@ function Dashboard() {
                       />
                       <span
                         style={{
-                          color: "rgba(249,250,251,0.72)",
+                          color: isLight
+                            ? "rgba(15,23,42,0.72)"
+                            : "rgba(249,250,251,0.72)",
                           fontSize: "14px",
                           fontWeight: "600",
                         }}
@@ -456,7 +537,7 @@ function Dashboard() {
 
                     <span
                       style={{
-                        color: "#F9FAFB",
+                        color: textPrimary,
                         fontSize: "15px",
                         fontWeight: "800",
                       }}
@@ -472,7 +553,7 @@ function Dashboard() {
           <SectionCard>
             <div
               style={{
-                color: "#F9FAFB",
+                color: textPrimary,
                 fontSize: "20px",
                 fontWeight: "800",
                 marginBottom: "18px",
@@ -491,8 +572,8 @@ function Dashboard() {
                 <div
                   key={label}
                   style={{
-                    background: "rgba(255,255,255,0.025)",
-                    border: "1px solid rgba(255,255,255,0.05)",
+                    background: miniStatBackground,
+                    border: miniStatBorder,
                     borderRadius: "16px",
                     padding: "16px 18px",
                     display: "flex",
@@ -502,7 +583,9 @@ function Dashboard() {
                 >
                   <span
                     style={{
-                      color: "rgba(249,250,251,0.68)",
+                      color: isLight
+                        ? "rgba(15,23,42,0.68)"
+                        : "rgba(249,250,251,0.68)",
                       fontSize: "15px",
                       fontWeight: "600",
                     }}
@@ -511,7 +594,7 @@ function Dashboard() {
                   </span>
                   <span
                     style={{
-                      color: "#F9FAFB",
+                      color: textPrimary,
                       fontSize: "20px",
                       fontWeight: "800",
                     }}
@@ -535,7 +618,7 @@ function Dashboard() {
         <SectionCard>
           <div
             style={{
-              color: "#F9FAFB",
+              color: textPrimary,
               fontSize: "20px",
               fontWeight: "800",
               marginBottom: "18px",
@@ -548,9 +631,10 @@ function Dashboard() {
             style={{
               height: "240px",
               borderRadius: "22px",
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: isLight
+                ? "linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(248,250,252,0.88) 100%)"
+                : "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)",
+              border: innerCardBorder,
               padding: "24px",
               display: "flex",
               flexDirection: "column",
@@ -573,7 +657,7 @@ function Dashboard() {
 
             <div
               style={{
-                color: "#F9FAFB",
+                color: textPrimary,
                 fontSize: "18px",
                 fontWeight: "700",
                 marginBottom: "8px",
@@ -584,7 +668,9 @@ function Dashboard() {
 
             <div
               style={{
-                color: "rgba(249,250,251,0.58)",
+                color: isLight
+                  ? "rgba(15,23,42,0.58)"
+                  : "rgba(249,250,251,0.58)",
                 fontSize: "14px",
                 maxWidth: "360px",
                 lineHeight: 1.6,
@@ -598,7 +684,7 @@ function Dashboard() {
         <SectionCard>
           <div
             style={{
-              color: "#F9FAFB",
+              color: textPrimary,
               fontSize: "20px",
               fontWeight: "800",
               marginBottom: "18px",
@@ -632,13 +718,15 @@ function Dashboard() {
                         i % 2 === 0
                           ? "linear-gradient(180deg, #F5A100 0%, #C58000 100%)"
                           : "linear-gradient(180deg, #7DB3D1 0%, #355D75 100%)",
-                      boxShadow: "0 10px 16px rgba(0,0,0,0.12)",
+                      boxShadow: isLight
+                        ? "0 10px 16px rgba(15,23,42,0.10)"
+                        : "0 10px 16px rgba(0,0,0,0.12)",
                     }}
                   />
                   <div
                     style={{
                       marginTop: "10px",
-                      color: "rgba(249,250,251,0.55)",
+                      color: textMuted,
                       fontSize: "12px",
                       fontWeight: "600",
                     }}
