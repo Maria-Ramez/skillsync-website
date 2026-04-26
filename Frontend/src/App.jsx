@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -10,21 +10,7 @@ import Payments from "./pages/Payments";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
-  const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
-
-  if (token && isLoggedIn) {
-    return children;
-  }
-
-  // Clean old or fake login data
-  localStorage.removeItem("token");
-  localStorage.removeItem("admin");
-  localStorage.removeItem("adminLoggedIn");
-
-  return <Navigate to="/" replace />;
-}
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
